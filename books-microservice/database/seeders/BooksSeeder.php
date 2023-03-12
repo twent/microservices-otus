@@ -2,13 +2,14 @@
 
 namespace Database\Seeders;
 
+use App\Models\Book;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
-class DatabaseSeeder extends Seeder
+class BooksSeeder extends Seeder
 {
     public function run(): void
     {
-        $this->call(BooksSeeder::class);
+        Book::factory(1000)->create();
     }
 }

@@ -1,0 +1,47 @@
+version: "3.9"
+
+services:
+  books-app:
+    container_name: books-app
+    image: webdevops/php-nginx-dev:8.1-alpine
+    working_dir: /app/public
+    env_file:
+      - .env
+    ports:
+      - '8000:80'
+    volumes:
+      - .:/app
+    networks:
+      - otus-microservices
+    depends_on:
+      - books-db
+      - books-cache
+
+  books-db:
+    container_name: books-db
+    image: postgres:15.2-alpine3.17
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - books-db-data:/var/lib/postgresql/data
+    ports:
+      - '5432:5432'
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER $$POSTGRES_DB" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - otus-microservices
+
+  books-cache:
+    container_name: books-cache
+    image: redis:latest
+
+volumes:
+  books-db-data:
+
+networks:
+  otus-microservices:
+    external: true
