@@ -1,0 +1,47 @@
+version: "3.9"
+
+services:
+  comments-app:
+    container_name: comments-app
+    image: webdevops/php-nginx-dev:8.1-alpine
+    working_dir: /app/public
+    env_file:
+      - .env
+    ports:
+      - '8001:80'
+    volumes:
+      - .:/app
+    networks:
+      - otus-microservices
+    depends_on:
+      - comments-db
+      - comments-cache
+
+  comments-db:
+    container_name: comments-db
+    image: postgres:15.2-alpine3.17
+    restart: unless-stopped
+    env_file:
+      - .env
+    volumes:
+      - comments-db-data:/var/lib/postgresql/data
+    ports:
+      - '5433:5432'
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U $$POSTGRES_USER $$POSTGRES_DB" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    networks:
+      - otus-microservices
+
+  comments-cache:
+    container_name: comments-cache
+    image: redis:latest
+
+volumes:
+  comments-db-data:
+
+networks:
+  otus-microservices:
+    external: true
