@@ -1,0 +1,210 @@
+openapi: '3.0.3'
+
+info:
+  title: "Comments REST API"
+  description: "Comments REST API"
+  contact:
+    name: twent
+    email: i@twent.ru
+  version: '1.0.0'
+
+servers:
+  - url: http://localhost:8001/api/v1
+    description: Public endpoint
+  - url: http://comments-app/api/v1
+    description: Internal endpoint
+
+tags:
+  - name: Comment
+    description: |
+      Endpoints related to the Comments
+
+paths:
+  /comments:
+    get:
+      operationId: index
+      tags:
+        - Comment
+      summary: Get comments list
+      parameters:
+        - name: entityId
+          in: query
+          description: Entity ID that we need to get comments for
+          schema:
+            type: string
+        - name: entityType
+          in: query
+          description: Entity type that we need to get comments for
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response with the list of comments
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Comment'
+        '401':
+          description: Unauthorized response
+        '500':
+          description: Unexpected internal server error
+    post:
+      operationId: addNewComment
+      tags:
+        - Comment
+      summary: Add new comment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentUpdateRequest'
+      responses:
+        '201':
+          description: Successful response if comment was created
+        '401':
+          description: Unauthorized response
+        '500':
+          description: Unexpected internal server error
+
+  /comments/{id}:
+    get:
+      operationId: getComment
+      tags:
+        - Comment
+      summary: Get comments list
+      parameters:
+        - name: id
+          in: path
+          description: Comment ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response with the comment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        '401':
+          description: Unauthorized response
+        '500':
+          description: Unexpected internal server error
+    patch:
+      operationId: updateComment
+      tags:
+        - Comment
+      summary: Add new comment
+      parameters:
+        - name: id
+          in: path
+          description: Comment ID
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CommentUpdateRequest'
+      responses:
+        '201':
+          description: Successful response with the comment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Comment'
+        '401':
+          description: Unauthorized response
+        '500':
+          description: Unexpected internal server error
+    delete:
+      operationId: deleteComment
+      tags:
+        - Comment
+      summary: Delete comment
+      parameters:
+        - name: id
+          in: path
+          description: Comment ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Successful response if comment was deleted
+        '401':
+          description: Unauthorized response
+        '500':
+          description: Unexpected internal server error
+
+components:
+  schemas:
+    Comment:
+      type: object
+      required:
+        - id
+        - entityType
+        - entityId
+        - author
+        - text
+      properties:
+        id:
+          type: integer
+          description: Unique ID of the comment
+          nullable: false
+          example: 1
+        entityType:
+          $ref: '#/components/schemas/entityType'
+        entityId:
+          $ref: '#/components/schemas/entityId'
+        author:
+          $ref: '#/components/schemas/author'
+        text:
+          $ref: '#/components/schemas/text'
+
+    CommentUpdateRequest:
+      type: object
+      required:
+        - entityType
+        - entityId
+        - author
+        - text
+      properties:
+        entityType:
+          $ref: '#/components/schemas/entityType'
+        entityId:
+          $ref: '#/components/schemas/entityId'
+        author:
+          $ref: '#/components/schemas/author'
+        text:
+          $ref: '#/components/schemas/text'
+
+    author:
+      type: string
+      description: Author full name
+      nullable: false
+      example: "Steven King"
+
+    text:
+      type: string
+      description: Comment text
+      nullable: false
+      example: "Nice!"
+
+    entityType:
+      type: string
+      description: Related entity type
+      nullable: false
+      enum: [ "App\\Models\\Book", "App\\Models\\Post" ]
+      example: "App\\Models\\Book"
+
+    entityId:
+      type: integer
+      description: Related entity id
+      nullable: false
+      example: 20
